@@ -1,5 +1,5 @@
 # Ignore Cypress files
-cypress/
+# cypress/
 node_modules/
 
 # Misc

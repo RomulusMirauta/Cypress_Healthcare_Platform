@@ -1,0 +1,98 @@
+name: Cypress tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cypress:
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "sa57843hFL^%*#"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install SQLCMD tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools unixodbc-dev
+          echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> $GITHUB_ENV
+
+      - name: Wait for SQL Server (sqlcmd)
+        run: |
+          echo "Waiting for SQL Server to come up..."
+          for i in $(seq 1 60); do
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "sa57843hFL^%*#" -Q "SELECT 1" && break || sleep 2
+          done
+
+      - name: Create length-limited Healthcare DB schema (optional)
+        run: |
+          echo "Applying SQL to create DB schema"
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "sa57843hFL^%*#" -i ci/create-healthcare-db.sql
+
+      # Optional: start the app if there's a start command (like `npm start`) configured
+      - name: Determine whether to start the app
+        run: |
+          # If package.json contains start script, set WANTS_START environment flag
+          if grep -q '"start"' package.json; then
+            echo "WANTS_START=true" >> $GITHUB_ENV
+          fi
+
+      - name: Start app (if needed)
+        run: |
+          # Start in background if start script exists
+          if grep -q '"start"' package.json; then
+            echo "Starting app with npm start in background"
+            npm start &
+          else
+            echo "No start script found - not starting app"
+          fi
+
+      - name: TypeScript compile check
+        run: npx tsc --noEmit
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+        env:
+          BASE_URL: http://localhost:3001
+          DB_USER: sa
+          DB_PASSWORD: sa57843hFL^%*#
+          DB_SERVER: localhost
+          DB_NAME: HealthcareDB
+
+      - name: Upload cypress results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-results
+          path: |
+            ./cypress/results
+            ./cypress/videos
+            ./cypress/screenshots

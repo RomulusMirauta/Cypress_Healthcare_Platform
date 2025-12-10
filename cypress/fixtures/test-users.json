@@ -1,0 +1,5 @@
+{
+  "admin": { "username": "admin1", "password": "admin194*%&)M", "role": "admin" },
+  "user_drugs": { "username": "user_drugs", "password": "user_drugs194*%&)M", "role": "drugs" },
+  "user_patients": { "username": "user_patients", "password": "user_patients194*%&)M", "role": "patients" }
+}
