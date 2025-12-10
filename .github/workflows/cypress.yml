@@ -5,15 +5,20 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test-cypress:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18]
+        browser: [chrome, electron]
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
-          SA_PASSWORD: "sa57843hFL^%*#"
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
           ACCEPT_EULA: "Y"
         ports:
           - 1433:1433
@@ -25,7 +30,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -45,13 +50,13 @@ jobs:
         run: |
           echo "Waiting for SQL Server to come up..."
           for i in $(seq 1 60); do
-            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "sa57843hFL^%*#" -Q "SELECT 1" && break || sleep 2
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" && break || sleep 2
           done
 
       - name: Create length-limited Healthcare DB schema (optional)
         run: |
           echo "Applying SQL to create DB schema"
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "sa57843hFL^%*#" -i ci/create-healthcare-db.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i ci/create-healthcare-db.sql
 
       # Optional: start the app if there's a start command (like `npm start`) configured
       - name: Determine whether to start the app
@@ -77,15 +82,15 @@ jobs:
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
-          browser: chrome
+          browser: ${{ matrix.browser }}
           wait-on: 'http://localhost:3001'
           wait-on-timeout: 60
         env:
-          BASE_URL: http://localhost:3001
-          DB_USER: sa
-          DB_PASSWORD: sa57843hFL^%*#
-          DB_SERVER: localhost
-          DB_NAME: HealthcareDB
+          BASE_URL: ${{ secrets.BASE_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
 
       - name: Upload cypress results
         if: always()

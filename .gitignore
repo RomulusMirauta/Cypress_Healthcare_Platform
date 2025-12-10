@@ -1,5 +1,6 @@
 # Ignore Cypress files
-# cypress/
+cypress/downloads/
+cypress/videos/
 node_modules/
 
 # Misc
