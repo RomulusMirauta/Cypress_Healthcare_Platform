@@ -1,0 +1,9 @@
+# Ignore Cypress files
+cypress/
+node_modules/
+
+# Misc
+.donotpush/
+*.sh
+*.log
+*.env

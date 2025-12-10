@@ -1,0 +1,19 @@
+{
+  "name": "bearingpoint-cypress-conversion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Converted Playwright tests to Cypress (minimal scaffold)",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:verify": "cypress verify",
+    "test": "npm run cypress:run",
+    "test:ci": "npx cypress run --browser chrome"
+  },
+  "devDependencies": {
+    "@types/node": "^20.1.3",
+    "cypress": "^15.7.1",
+    "mssql": "^9.1.1",
+    "typescript": "^5.1.3"
+  }
+}
