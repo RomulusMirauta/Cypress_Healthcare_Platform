@@ -15,17 +15,15 @@ export class PatientsPage {
     return this;
   }
 
-  findPatientCardsByName(name: string) {
+  findPatientCardsByName(name: string): Cypress.Chainable<JQuery<HTMLElement>> {
     return cy.get('.patients-list .patient-card').filter(`:contains("${name}")`);
   }
 
   removePatientByDetails(firstName: string, lastName: string) {
     const name = `${firstName} ${lastName}`;
     cy.on('window:confirm', () => true);
-    this.findPatientCardsByName(name).then((cards) => {
-      Cypress.$(cards).each((_, el) => {
-        cy.wrap(el).contains('button', 'Remove').click();
-      });
+    this.findPatientCardsByName(name).each((card) => {
+      cy.wrap(card).contains('button', 'Remove').click();
     });
     return this;
   }

@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 // Custom commands for domain-specific actions
-(Cypress.Commands as any).add('loginUI', (username: string, password: string) => {
+Cypress.Commands.add('loginUI', (username: string, password: string) => {
   cy.visit('/');
   cy.get('[placeholder="Username"]').clear().type(username);
   cy.get('[placeholder="Password"]').clear().type(password);
@@ -8,8 +8,8 @@
 });
 
 // Add a patient via the UI
-// Use any on Commands for typings
-(Cypress.Commands as any).add(
+// Custom command to add a patient via UI
+Cypress.Commands.add(
   'addPatientUI', (firstName: string, lastName: string, dob: string, gender: string, address: string) => {
     cy.get('.db-label').contains('Patients').click();
     cy.get('[placeholder="First Name"]').type(firstName);
@@ -22,20 +22,20 @@
 );
 
 // Remove patient by full name elements in the list and accept confirm dialogs
-(Cypress.Commands as any).add('removePatientByDetailsUI', (firstName: string, lastName: string) => {
+Cypress.Commands.add('removePatientByDetailsUI', (firstName: string, lastName: string) => {
   const name = `${firstName} ${lastName}`;
   // Accept confirm dialogs
-  cy.on('window:confirm', () => true);
-  cy.get('.patients-list .patient-card').filter(`:contains("${name}")`).then((cards) => {
-    // Remove each card that matches
-    Cypress.$(cards).each((_, el) => {
-      cy.wrap(el).contains('button', 'Remove').click();
-    });
+  const confirmHandler = () => true;
+  cy.on('window:confirm', confirmHandler);
+  cy.get('.patients-list .patient-card').filter(`:contains("${name}")`).each((card) => {
+    cy.wrap(card).contains('button', 'Remove').click();
   });
+  // Unregister handler to avoid leaking state between tests
+  cy.on('window:confirm', () => true);
 });
 
 // Add a drug via the UI
-(Cypress.Commands as any).add('addDrugUI', (name: string, description: string, dosage: string) => {
+Cypress.Commands.add('addDrugUI', (name: string, description: string, dosage: string) => {
   cy.get('.db-label').contains('Drugs').click();
   cy.get('[placeholder="Drug Name"]').type(name);
   cy.get('[placeholder="Description"]').type(description);
@@ -44,21 +44,23 @@
 });
 
 // Remove drug by details
-(Cypress.Commands as any).add('removeDrugByDetailsUI', (name: string, description: string, dosage: string) => {
-  cy.on('window:confirm', () => true);
-  cy.get('.drugs-list .drug-card').filter(`:contains("${name}")`).then((cards) => {
-    Cypress.$(cards).each((_, el) => {
-      const text = Cypress.$(el).text();
+Cypress.Commands.add('removeDrugByDetailsUI', (name: string, description: string, dosage: string) => {
+  const confirmHandler = () => true;
+  cy.on('window:confirm', confirmHandler);
+  cy.get('.drugs-list .drug-card').filter(`:contains("${name}")`).each((card) => {
+    cy.wrap(card).then(($el) => {
+      const text = $el.text();
       if (text.includes(description) && text.includes(dosage)) {
-        cy.wrap(el).contains('button', 'Remove').click();
+        cy.wrap($el).contains('button', 'Remove').click();
       }
     });
   });
+  cy.on('window:confirm', () => true);
 });
 
 // API helper using cy.request, optional credentials
-(Cypress.Commands as any).add('apiRequest', (method: string, url: string, body?: any, creds?: { username: string; password: string }) => {
-  const options: any = { method: method as any, url, body, failOnStatusCode: false };
+Cypress.Commands.add('apiRequest', (method: string, url: string, body?: any, creds?: { username: string; password: string }) => {
+  const options: Partial<Cypress.RequestOptions> = { method: method as any, url, body, failOnStatusCode: false };
   if (creds) {
     const q = `?username=${encodeURIComponent(creds.username)}&password=${encodeURIComponent(creds.password)}`;
     options.url = url + q;
@@ -68,8 +70,8 @@
 });
 
 // DB task wrapper
-// Use any on Commands to bypass typings for the moment
-(Cypress.Commands as any).add('dbQuery', (query: string, inputs?: any[]) => {
+// DB task wrapper
+Cypress.Commands.add('dbQuery', (query: string, inputs?: any[]) => {
   return cy.task('db:query', { query, inputs });
 });
 
