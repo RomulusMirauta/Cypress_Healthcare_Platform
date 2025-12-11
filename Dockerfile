@@ -1,4 +1,4 @@
-# Dockerfile (place in project root)
+# Dockerfile (to be placed in project root)
 FROM node:18-alpine
 
 WORKDIR /app
