@@ -6,21 +6,21 @@ Running tests (Windows PowerShell):
 
 1. Install dependencies
 
-```powershell
-npm ci
-```
+    ```powershell
+    npm ci
+    ```
 
 2. Run in interactive mode
 
-```powershell
-npm run cypress:open
-```
+    ```powershell
+    npm run cypress:open
+    ```
 
 3. Or run headless
 
-```powershell
-npm run cypress:run
-```
+    ```powershell
+    npm run cypress:run
+    ```
 
 Notes
 
@@ -43,3 +43,69 @@ Make sure you add the following repository secrets to GitHub for CI:
 - `BASE_URL` (the base URL for the app under test)
 
 Use the GitHub repository settings > Secrets to add these secrets to avoid storing plain credentials in the workflow definition.
+
+## Useful Docker Commands
+
+### Build Docker Image
+
+    ```
+    docker build -t my-app .
+    ```
+
+Builds an image named `my-app` from the Dockerfile in the current directory.
+
+### Run Docker Container
+
+    ```
+    docker run -p 3000:3000 my-app
+    ```
+
+Runs the `my-app` image and maps port 3000 of the container to port 3000 on your machine.
+
+### List Docker Images
+
+    ```
+    docker images
+    ```
+
+Shows all images on your system.
+
+### Remove Docker Image
+
+    ```
+    docker rmi my-app
+    ```
+
+Removes the image named `my-app`.
+
+### Docker Compose: Build and Start Services
+
+    ```
+    docker-compose up --build
+    ```
+
+Builds images and starts all services defined in `docker-compose.yml`.
+
+### Docker Compose: Stop and Remove Services
+
+    ```
+    docker-compose down
+    ```
+
+Stops and removes containers, networks, and volumes created by `docker-compose up`.
+
+### Docker Compose: View Logs
+
+    ```
+    docker-compose logs
+    ```
+
+Shows logs for all services managed by Docker Compose.
+
+### Docker Compose: Run a One-off Command
+
+    ```
+    docker-compose run <service> <command>
+    ```
+
+Runs a command in a new container for the specified service.
