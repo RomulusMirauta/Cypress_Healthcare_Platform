@@ -1,0 +1,100 @@
+name: Cypress CI tests (Docker Compose)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cypress:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18]
+        browser: [chrome, firefox, edge, electron]
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Bring up Docker Compose (optional)
+        run: |
+          if [ -f "ci/docker-compose.ci.yml" ]; then
+            echo "Using docker compose: ci/docker-compose.ci.yml"
+            docker compose -f ci/docker-compose.ci.yml up -d --build
+          else
+            echo "No ci/docker-compose.ci.yml - skipping compose step"
+          fi
+
+      - name: SQL Tools + DB seed
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools unixodbc-dev
+          echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> $GITHUB_ENV
+          for i in {1..60}; do
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" && break || sleep 2
+          done
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i ci/create-healthcare-db.sql
+
+      - name: Start app (compose or npm)
+        run: |
+          if [ -f "ci/docker-compose.ci.yml" ]; then
+            echo "Using docker compose for starting the app"
+            docker compose -f ci/docker-compose.ci.yml up -d --build
+          elif grep -q '"start"' package.json; then
+            npm start &
+          else
+            echo "No app configured"
+          fi
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          browser: ${{ matrix.browser }}
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 60
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          USER_DRUGS_PASSWORD: ${{ secrets.USER_DRUGS_PASSWORD }}
+          USER_PATIENTS_PASSWORD: ${{ secrets.USER_PATIENTS_PASSWORD }}
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-results
+          path: |
+            cypress/results
+            cypress/videos
+            cypress/screenshots

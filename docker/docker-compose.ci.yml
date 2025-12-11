@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1"]
+      interval: 5s
+      retries: 60
+
+  # App service: either build from ./app or provide an image in your CI (customize as needed)
+  app:
+    build: ./app
+    environment:
+      - PORT=3001
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SERVER=${DB_SERVER}
+      - DB_NAME=${DB_NAME}
+    depends_on:
+      - db
+    ports:
+      - "3001:3001"
