@@ -1,5 +1,5 @@
-import { LoginPage } from '../page-objects/LoginPage';
-import { DrugsPage } from '../page-objects/DrugsPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { DrugsPage } from '../../page-objects/DrugsPage';
 
 describe('Drugs UI tests', () => {
   it('add and remove drug via UI', () => {

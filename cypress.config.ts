@@ -15,8 +15,8 @@ const DB_CONFIG = {
 export default defineConfig({
   e2e: {
     baseUrl: process.env.BASE_URL || 'http://localhost:3001/',
-    specPattern: 'cypress/e2e/**/*.spec.ts',
-    supportFile: 'cypress/support/e2e.ts',
+    specPattern: 'cypress/tests/**/*.spec.ts',
+    supportFile: 'cypress/support/support.ts',
     setupNodeEvents(on, config) {
       // Register tasks for DB queries
       on('task', {

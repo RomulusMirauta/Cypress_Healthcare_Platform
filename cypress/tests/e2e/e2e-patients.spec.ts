@@ -1,5 +1,5 @@
-import { LoginPage } from '../page-objects/LoginPage';
-import { PatientsPage } from '../page-objects/PatientsPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { PatientsPage } from '../../page-objects/PatientsPage';
 
 describe('E2E: Patients (UI + DB validation)', () => {
   it('add and remove patient and verify DB', () => {

@@ -1,5 +1,5 @@
-import { LoginPage } from '../page-objects/LoginPage';
-import { PatientsPage } from '../page-objects/PatientsPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { PatientsPage } from '../../page-objects/PatientsPage';
 
 describe('Patients UI tests', () => {
   it('add and remove patient via UI', () => {

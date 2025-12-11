@@ -1,6 +1,6 @@
-# Playwright -> Cypress Converted Tests
+# Cypress Tests
 
-This repository contains a converted set of end-to-end tests originally written for Playwright. The tests are ported to Cypress. The converted tests live under `cypress/e2e` and page objects and helpers are under `cypress/support` and `cypress/page-objects`.
+This repository contains a set of tests written for Cypress. The converted tests live under `cypress` and page objects and helpers are under `cypress/support` and `cypress/page-objects`.
 
 Running tests (Windows PowerShell):
 
@@ -10,13 +10,13 @@ Running tests (Windows PowerShell):
 npm ci
 ```
 
-1. Run in interactive mode
+2. Run in interactive mode
 
 ```powershell
 npm run cypress:open
 ```
 
-1. Or run headless
+3. Or run headless
 
 ```powershell
 npm run cypress:run
@@ -31,7 +31,7 @@ CI (GitHub Actions)
 
 1. A sample GitHub Actions workflow `cypress.yml` runs the Cypress suite using a SQL Server container and will attempt to start the app with `npm start` if the `start` script exists. The action runs a DB setup SQL script `ci/create-healthcare-db.sql` and runs the tests across multiple Node/browser matrices via `workflow_dispatch` as a manual trigger.
 
-1. CI Secrets
+2. CI Secrets
 
 Make sure you add the following repository secrets to GitHub for CI:
 

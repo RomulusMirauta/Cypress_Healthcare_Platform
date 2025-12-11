@@ -1,5 +1,5 @@
-import { LoginPage } from '../page-objects/LoginPage';
-import { DrugsPage } from '../page-objects/DrugsPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { DrugsPage } from '../../page-objects/DrugsPage';
 
 describe('E2E: Drugs (UI + DB validation)', () => {
   it('add and remove drug and verify DB', () => {

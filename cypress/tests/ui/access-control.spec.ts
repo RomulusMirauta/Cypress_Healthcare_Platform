@@ -1,4 +1,4 @@
-import { LoginPage } from '../page-objects/LoginPage';
+import { LoginPage } from '../../page-objects/LoginPage';
 
 describe('Role-based access control', () => {
   it('admin can access all sections, username and logout are displayed in UI', () => {

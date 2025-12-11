@@ -1,5 +1,5 @@
 {
-  "name": "bearingpoint-cypress-conversion",
+  "name": "playwright-conversion-cypress",
   "version": "0.1.0",
   "private": true,
   "description": "Converted Playwright tests to Cypress (minimal scaffold)",

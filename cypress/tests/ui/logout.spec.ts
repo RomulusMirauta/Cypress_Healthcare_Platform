@@ -1,4 +1,4 @@
-import { LoginPage } from '../page-objects/LoginPage';
+import { LoginPage } from '../../page-objects/LoginPage';
 
 describe('Logout', () => {
   it('logout redirects to login page', () => {

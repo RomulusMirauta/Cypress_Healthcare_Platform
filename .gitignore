@@ -1,10 +1,28 @@
 # Ignore Cypress files
 cypress/downloads/
 cypress/videos/
+cypress/screenshots/
+cypress/results/
 node_modules/
+
+# Build / coverage / TS
+coverage/
+dist/
+build/
+out-tsc/
+tsconfig.tsbuildinfo
+
+# Ignore local environment files, but keep example
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
 
 # Misc
 .donotpush/
 *.sh
 *.log
-*.env
