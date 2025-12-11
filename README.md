@@ -36,7 +36,7 @@ CI (GitHub Actions)
 Make sure you add the following repository secrets to GitHub for CI:
 
 - `SA_PASSWORD` (SQL Server SA password for the service container)
-- `DB_USER` (DB username used by tests, typically `sa`)
+- `DB_USER` (DB username used by tests, typically `sa` *(by default)*)
 - `DB_PASSWORD` (DB password used by tests)
 - `DB_SERVER` (usually `localhost` in the CI but override as needed)
 - `DB_NAME` (like `HealthcareDB`)
