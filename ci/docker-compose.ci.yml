@@ -15,7 +15,7 @@ services:
 
   # App service: either build from ./app or provide an image in your CI (customize as needed)
   app:
-    build: ./app
+    build: .
     environment:
       - PORT=3001
       - DB_USER=${DB_USER}
@@ -26,3 +26,7 @@ services:
       - db
     ports:
       - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 5s
+      retries: 12
